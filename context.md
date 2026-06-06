@@ -18,7 +18,7 @@ The agent must pull jobs from three platforms:
 |---|---|---|---|---|
 | **Naukri** | https://www.naukri.com | Internal JSON API (`https://www.naukri.com/jobapi/v3/search`) | Hard | Requires specific headers (`appid`, `systemid`, etc.) and has strong anti-bot protection. Plain HTML scraping is unreliable because listings render client-side. |
 | **RemoteOK** | https://remoteok.com | Public JSON API (`https://remoteok.com/api`) | Easy | Returns recent remote jobs as JSON; filter client-side by title/keyword. Free, no auth. Best starting point. |
-| **Wellfound** (formerly AngelList Talent) | https://wellfound.com | Internal GraphQL API | Hard | Cloudflare-protected; likely needs a real browser session (Playwright via the existing Chrome/CDP setup) or authenticated cookies. |
+| **Wellfound** (formerly AngelList Talent) | https://wellfound.com | Internal GraphQL API (`https://wellfound.com/graphql`) | Hard | Cloudflare-protected; likely needs a real browser session (Playwright via the existing Chrome/CDP setup) or authenticated cookies. |
 
 The three sources differ a lot in accessibility. RemoteOK is trivial via its
 public API. Naukri and Wellfound are protected and will likely need either their
