@@ -18,12 +18,12 @@ The agent must pull jobs from three platforms:
 |---|---|---|---|---|
 | **Naukri** | https://www.naukri.com | Internal JSON API (`https://www.naukri.com/jobapi/v3/search`) | Hard | Requires specific headers (`appid`, `systemid`, etc.) and has strong anti-bot protection. Plain HTML scraping is unreliable because listings render client-side. |
 | **RemoteOK** | https://remoteok.com | Public JSON API (`https://remoteok.com/api`) | Easy | Returns recent remote jobs as JSON; filter client-side by title/keyword. Free, no auth. Best starting point. |
-| **Wellfound** (formerly AngelList Talent) | https://wellfound.com | Internal GraphQL API (`https://wellfound.com/graphql`) | Hard | Cloudflare-protected; likely needs a real browser session (Playwright via the existing Chrome/CDP setup) or authenticated cookies. |
+| **LinkedIn** | https://www.linkedin.com/jobs | Guest job-search API (`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search`) | Hard | The guest endpoint returns paginated job-card HTML without login, but LinkedIn rate-limits and anti-bots aggressively; heavy use likely needs authenticated cookies or a real browser (Playwright via the existing Chrome/CDP setup). |
 
 The three sources differ a lot in accessibility. RemoteOK is trivial via its
-public API. Naukri and Wellfound are protected and will likely need either their
-internal APIs with the right headers, or a real browser to render and extract
-listings.
+public API. Naukri and LinkedIn are protected and will likely need either their
+internal/guest APIs with the right headers, or a real browser to render and
+extract listings.
 
 ## 3. Goal / Desired Outcome
 
@@ -38,7 +38,7 @@ listings.
 
 | Column | Description |
 |---|---|
-| `source` | `naukri` / `remoteok` / `wellfound` |
+| `source` | `naukri` / `remoteok` / `linkedin` |
 | `title` | Job title |
 | `company` | Company name |
 | `location` | Location (or `Remote`) |
@@ -76,7 +76,7 @@ job_agent/
     base.py                 # JobSource interface -> search(keyword) -> list[Job]
     remoteok.py             # public API client (start here, easiest)
     naukri.py               # internal API or Playwright fallback
-    wellfound.py            # GraphQL / Playwright fallback
+    linkedin.py             # guest job-search API or Playwright fallback
   models.py                 # Job dataclass = the CSV schema above
   dedupe.py                 # de-duplication logic
   writer.py                 # write / append consolidated CSV
@@ -89,7 +89,7 @@ platform stays isolated and testable.
 
 ## 7. Key Challenges & Considerations
 
-- **Anti-scraping:** Naukri and Wellfound actively block bots. Prefer
+- **Anti-scraping:** Naukri and LinkedIn actively block bots. Prefer
   official/internal JSON APIs with correct headers; fall back to Playwright (the
   environment already exposes Chrome via CDP) for rendering when needed.
 - **Rate limiting / politeness:** add delays and retries; cache responses during
@@ -107,7 +107,7 @@ platform stays isolated and testable.
 - **Python 3** (existing).
 - `requests` for HTTP/JSON APIs, `beautifulsoup4` for any HTML parsing.
 - **Playwright** (via the existing Chrome/CDP setup) as a fallback for
-  JS-rendered or Cloudflare-protected sources (Naukri, Wellfound).
+  JS-rendered or bot-protected sources (Naukri, LinkedIn).
 - Standard-library `csv` for output.
 
 ## 9. Milestones
@@ -117,6 +117,7 @@ platform stays isolated and testable.
    CSV) with the easiest source.
 2. **Naukri** — add the internal JSON API client with the required headers; fall
    back to Playwright if blocked.
-3. **Wellfound** — add a Playwright-based source to handle Cloudflare/GraphQL.
+3. **LinkedIn** — add the guest job-search API client; fall back to Playwright
+   with authenticated cookies if rate-limited or blocked.
 4. **Orchestration & polish** — config-driven keywords/filters, append + dedupe,
    retries/rate limiting, and (optionally) scheduled runs.
