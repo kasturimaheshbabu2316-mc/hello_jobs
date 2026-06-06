@@ -1,0 +1,30 @@
+# Job agent configuration.
+# Edit the keywords/sources/filters, then run:
+#   python -m job_agent.main --config config.yaml
+
+keywords:
+  - Software Engineer
+  - DevOps Engineer
+  - Data Engineer
+
+# Sources to query. Available: remoteok, naukri, wellfound
+sources:
+  - remoteok
+  - naukri
+  - wellfound
+
+filters:
+  location: ""        # substring match on job location; "" = any
+  remote_only: false  # keep only jobs whose location mentions "remote"
+
+limits:
+  per_keyword: 50     # max jobs per keyword per source
+
+output:
+  csv_path: jobs.csv
+  mode: append        # "append" (de-dupe into existing file) or "overwrite"
+
+request:
+  delay_seconds: 1.5  # politeness delay between requests
+  timeout: 20
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
