@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+jobs.csv
+scrape_results.txt
+scrape_results.html
